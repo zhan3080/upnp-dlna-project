@@ -1,2 +1,3 @@
+include ':upnplibrary'
 include ':app'
 rootProject.name = "UpnpProject"

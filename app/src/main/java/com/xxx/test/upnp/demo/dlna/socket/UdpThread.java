@@ -1,16 +1,13 @@
-package com.xxx.test.upnp.demo.socket;
+package com.xxx.test.upnp.demo.dlna.socket;
 
 import android.util.Log;
 
-import java.io.IOException;
-import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
-import java.net.Socket;
 import java.util.Enumeration;
 
 public class UdpThread extends Thread {
@@ -24,7 +21,6 @@ public class UdpThread extends Thread {
     public static final String ADDRESS = "239.255.255.250";
 
     private DatagramSocket mSendSocket;
-    private DatagramSocket mReceiveSocket;
     private MulticastSocket mMulticastSocket;
 
 
@@ -34,7 +30,7 @@ public class UdpThread extends Thread {
         while (mMulticastSocket != null) {
             receive(mMulticastSocket);
             try {
-                Thread.sleep(1000);
+                Thread.sleep(3000);
             }catch (Exception e){
 
             }
@@ -110,21 +106,6 @@ public class UdpThread extends Thread {
             InetSocketAddress ssdpMultiGroup = new InetSocketAddress(InetAddress.getByName(addr), port);
             NetworkInterface ssdpMultiIf = NetworkInterface.getByInetAddress(bindAddr);
             mMulticastSocket.joinGroup(ssdpMultiGroup, ssdpMultiIf);
-        } catch (Exception e) {
-            Log.d(TAG, null, e);
-            return false;
-        }
-        return true;
-    }
-
-    public boolean open(String bindAddr, int bindPort) throws BindException {
-
-        try {
-            InetSocketAddress bindInetAddr = new InetSocketAddress(bindAddr, bindPort);
-            mReceiveSocket = new DatagramSocket(bindInetAddr);
-        } catch (BindException e) {
-            Log.d(TAG, null, e);
-            throw e;
         } catch (Exception e) {
             Log.d(TAG, null, e);
             return false;
