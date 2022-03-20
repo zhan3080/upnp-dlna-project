@@ -20,6 +20,21 @@ public class UdpThread extends Thread {
      */
     public static final String ADDRESS = "239.255.255.250";
 
+    public static final String CRLF = "\r\n";
+
+    private String getSearchString(){
+        StringBuffer str = new StringBuffer();
+        str.append("M-SEARCH * HTTP/1.1" + CRLF);
+        str.append("ST: " + "urn:schemas-upnp-org:device:MediaRenderer:1" + CRLF);
+        str.append("MX: 3" + CRLF);
+        str.append("MAN: \"ssdp:discover\"" + CRLF);
+        str.append("User-Agent: DMP/2.5.8, UPnP/1.0," + CRLF);
+        str.append("HOST: 239.255.255.250:1900" + CRLF);
+        str.append(CRLF);
+        String content = str.toString();
+        return content;
+    }
+
     private DatagramSocket mSendSocket;
     private MulticastSocket mMulticastSocket;
 
@@ -66,8 +81,8 @@ public class UdpThread extends Thread {
         return str;
     }
 
-    public boolean post(String msg) {
-        return post(ADDRESS,PORT,msg);
+    public boolean post() {
+        return post(ADDRESS,PORT,getSearchString());
     }
 
     public boolean post(String addr, int port, String msg) {

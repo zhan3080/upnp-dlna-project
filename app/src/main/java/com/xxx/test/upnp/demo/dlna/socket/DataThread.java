@@ -53,13 +53,16 @@ public class DataThread extends Thread{
         String content = null;
         if(mPackageSocket != null){
             try {
+                Log.i(TAG, "receiveTargetDescription receive " + mPackageSocket.isClosed());
                 mPackageSocket.receive(mDatagramPacket);
             }catch (Exception e){
 
             }
         }
+
         if(mDatagramPacket != null){
-            content = new String(mDatagramPacket.getData());
+            Log.i(TAG, "SearchThread mDatagramPakcet.getData len " + mDatagramPacket.getLength());
+            content = new String(mDatagramPacket.getData(), 0, mDatagramPacket.getLength());
         }
         Log.i(TAG,"receiveTargetDescription content:" + content);
         return content;

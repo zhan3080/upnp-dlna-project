@@ -2,6 +2,11 @@ package com.xxx.test.upnp.demo.dlna.search;
 
 import android.util.Log;
 
+import com.xxx.test.upnp.demo.parser.XmlParser;
+
+import java.io.BufferedReader;
+import java.io.LineNumberReader;
+import java.io.Reader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -16,6 +21,12 @@ public class SearchThread extends Thread {
     private static final String DMR_ST = "urn:schemas-upnp-org:device:MediaRenderer:1";
     private static final String ROOTDEVICE_ST = "upnp:rootdevice";
     private String mSearchString = null;
+
+    /********************  forTest ********************/
+//    private static String SOURCE_IP = "192.168.31.120";
+    private static String SOURCE_IP = "192.168.0.13";
+    private static int SOURCE_PORT = 16080;
+    private static String LOCATION = "http://192.168.0.12:49152/description.xml";
 
     public static final String CRLF = "\r\n";
 
@@ -46,6 +57,8 @@ public class SearchThread extends Thread {
             if (mDatagramPakcet != null && mDatagramPakcet.getData().length > 0) {
                 String packetData = new String(mDatagramPakcet.getData(), 0, mDatagramPakcet.getLength());
                 Log.i(TAG, "receive packetData string:" + packetData);
+//                XmlParser.parserSSDP(mDatagramPakcet.getData());
+                XmlParser.getLocation(packetData);
             }
         }
     }
@@ -53,7 +66,7 @@ public class SearchThread extends Thread {
     public SearchThread() {
         Log.i(TAG, "SearchThread");
         try {
-            InetSocketAddress bindInetAddr = new InetSocketAddress("192.168.31.120", 16080);
+            InetSocketAddress bindInetAddr = new InetSocketAddress(SOURCE_IP, SOURCE_PORT);
             mDatagramSocket = new DatagramSocket(bindInetAddr);
             Log.i(TAG, "SearchThread mDatagramSocket:" + mDatagramSocket);
         } catch (Exception e) {
@@ -70,15 +83,15 @@ public class SearchThread extends Thread {
                 if (mDatagramSocket != null) {
                     try {
                         InetAddress inetAddr = InetAddress.getByName("239.255.255.250");
-                        mSearchString = getSearchString(ROOTDEVICE_ST);
-                        DatagramPacket packet = new DatagramPacket(mSearchString.getBytes(), mSearchString.length(),inetAddr,1900);
-                        Log.i(TAG, "startSearch send:\n" + mSearchString);
-                        mDatagramSocket.send(packet);
+//                        mSearchString = getSearchString(ROOTDEVICE_ST);
+//                        DatagramPacket packet = new DatagramPacket(mSearchString.getBytes(), mSearchString.length(),inetAddr,1900);
+//                        Log.i(TAG, "startSearch send:\n" + mSearchString);
+//                        mDatagramSocket.send(packet);
 //                        sleep(100);
-//                        mSearchString = getSearchString(DMR_ST);
-//                        DatagramPacket packet1 = new DatagramPacket(mSearchString.getBytes(), mSearchString.length(),inetAddr,1900);
-//                        Log.i(TAG, "startSearch send1:\n" + mSearchString);
-//                        mDatagramSocket.send(packet1);
+                        mSearchString = getSearchString(DMR_ST);
+                        DatagramPacket packet1 = new DatagramPacket(mSearchString.getBytes(), mSearchString.length(),inetAddr,1900);
+                        Log.i(TAG, "startSearch send1:\n" + mSearchString);
+                        mDatagramSocket.send(packet1);
                         Log.i(TAG, "startSearch send end");
                     } catch (Exception e) {
 

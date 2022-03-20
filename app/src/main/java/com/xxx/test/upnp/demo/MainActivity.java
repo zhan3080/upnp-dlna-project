@@ -12,18 +12,14 @@ import android.view.View;
 import android.widget.Button;
 
 import com.xxx.test.dlna.DMC;
-import com.xxx.test.upnp.demo.dlna.search.SearchThread;
-import com.xxx.test.upnp.demo.dlna.socket.DataThread;
-import com.xxx.test.upnp.demo.dlna.socket.UdpThread;
-
+import com.xxx.test.upnp.demo.dlna.Controller;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private Button searchBtn;
-    private UdpThread mUdnThread;
-    private DataThread mdataThread = null;
+    private Button searchBtn, serviceShow,setUrlBtn;
+    private Controller controller = new Controller();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,10 +28,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         searchBtn = findViewById(R.id.search_id);
         searchBtn.setOnClickListener(listener);
+        serviceShow = findViewById(R.id.service_show);
+        serviceShow.setOnClickListener(listener);
+        setUrlBtn = findViewById(R.id.play);
+        setUrlBtn.setOnClickListener(listener);
         checkPermission();
         // 被动收到设备广播
-        mUdnThread = new UdpThread();
-        mUdnThread.start();
+//        controller.startService();
     }
 
     private View.OnClickListener listener = new View.OnClickListener() {
@@ -43,13 +42,16 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View view) {
             switch (view.getId()) {
                 case R.id.search_id:
-//                    sendContent(SEARCH_CONTENT);
-//                    getdevice();
-//                    testDmcBrower();
                     // 主动搜索
-                    SearchThread searchThread = new SearchThread();
-                    searchThread.start();
-                    searchThread.startSearch();
+                    controller.sartBrowse();
+                    break;
+                case R.id.service_show:
+                    // 获取服务信息
+                    controller.getdevice();
+                    break;
+                case R.id.play:
+                    // 播放url
+                    controller.setAVTransport();
                     break;
             }
         }
@@ -95,32 +97,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         Log.i(TAG, "onRequestPermissionsResult 11grantResults[0]: " + grantResults[0]);
-    }
-
-    private void sendContent(String content){
-        if(mUdnThread == null){
-            return;
-        }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                mUdnThread.post(content);
-            }
-        }).start();
-    }
-    private void getdevice(){
-        if(mdataThread == null) {
-            mdataThread = new DataThread();
-            mdataThread.open("192.168.31.120", 12344);
-            mdataThread.start();
-        }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                mdataThread.requestDescription("192.168.31.201",49154,"GET_DESCRIPTION");
-            }
-        }).start();
-
     }
 
     // CyberGarage 源码测试
