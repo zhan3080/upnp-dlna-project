@@ -2,6 +2,7 @@ package com.xxx.test.upnp.demo.dlna.search;
 
 import android.util.Log;
 
+import com.xxx.test.upnp.demo.Util;
 import com.xxx.test.upnp.demo.parser.XmlParser;
 
 import java.io.BufferedReader;
@@ -24,7 +25,7 @@ public class SearchThread extends Thread {
 
     /********************  forTest ********************/
 //    private static String SOURCE_IP = "192.168.31.120";
-    private static String SOURCE_IP = "192.168.0.13";
+//    private static String SOURCE_IP = "192.168.0.13";
     private static int SOURCE_PORT = 16080;
     private static String LOCATION = "http://192.168.0.12:49152/description.xml";
 
@@ -64,9 +65,10 @@ public class SearchThread extends Thread {
     }
 
     public SearchThread() {
-        Log.i(TAG, "SearchThread");
+        Log.i(TAG, "SearchThread localIp:" + Util.getIPAddress("wlan0"));
+
         try {
-            InetSocketAddress bindInetAddr = new InetSocketAddress(SOURCE_IP, SOURCE_PORT);
+            InetSocketAddress bindInetAddr = new InetSocketAddress(Util.getIPAddress("wlan0"), SOURCE_PORT);
             mDatagramSocket = new DatagramSocket(bindInetAddr);
             Log.i(TAG, "SearchThread mDatagramSocket:" + mDatagramSocket);
         } catch (Exception e) {
