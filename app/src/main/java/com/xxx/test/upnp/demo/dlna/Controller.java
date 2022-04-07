@@ -11,7 +11,8 @@ public class Controller {
     public static final String TAG = "Controller";
 
     //String mUrl = "http://192.168.0.12:49152/description.xml";
-    String mUrl = "http://192.168.31.201:49152/description.xml";
+//    String mUrl = "http://192.168.31.201:49152/description.xml";
+    String mUrl = "http://192.168.31.16:49152/description.xml";
     public static final String CRLF = "\r\n";
     MyStreamSocket mySocket = null;
     SearchThread searchThread = null;
@@ -100,17 +101,17 @@ public class Controller {
 //  </s:Body>
 //</s:Envelope>
 
-    private String AVTransportBody = "<s:Envelope xmlns:s=\\\"http://schemas.xmlsoap.org/soap/envelope/\\\" s:encodingStyle=\\\"http://schemas.xmlsoap.org/soap/encoding/\\\">\" + CRLF +\n" +
-            "                \"<s:Body>\" + CRLF +\n" +
-            "                \"<u:SetAVTransportURI xmlns:u=\\\"urn:schemas-upnp-org:service:AVTransport:1\\\">\" + CRLF +\n" +
-            "                \"<InstanceID>0</InstanceID>\" + CRLF +\n" +
-            "                \"<CurrentURI>http://video.hpplay.cn/demo/aom.mp4</CurrentURI>\" + CRLF +\n" +
-            "                \"</u:SetAVTransportURI>\" + CRLF +\n" +
-            "                \"</s:Body>\" + CRLF +\n" +
-            "                \"</s:Envelope>";
+    private String AVTransportBody = "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n" +
+            "  <s:Body>\n" +
+            "    <u:SetAVTransportURI xmlns:u=\"urn:schemas-upnp-org:service:AVTransport:1\">\n" +
+            "      <InstanceID>0</InstanceID>\n" +
+            "      <CurrentURI>http://video.hpplay.cn/demo/aom.mp4</CurrentURI>\n" +
+            "    </u:SetAVTransportURI>\n" +
+            "  </s:Body>\n" +
+            "</s:Envelope>";
     private String getAVTransportPost(String host, int port){
         StringBuffer str = new StringBuffer();
-        str.append(" POST / _urn:schemas-upnp-org:service:AVTransport_control HTTP/1.1" + CRLF);
+        str.append(" POST /_urn:schemas-upnp-org:service:AVTransport_control HTTP/1.1" + CRLF);
         str.append("User-Agent: DMP/2.5.8, UPnP/1.0," + CRLF);
         str.append("HOST: " + host + ":" + port + CRLF);
         str.append("CONTENT-LENGTH: " + AVTransportBody.getBytes().length + CRLF);
@@ -121,6 +122,31 @@ public class Controller {
         String content = str.toString();
         return content;
     }
+
+
+//    private String AVTransportBody = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+//            "    <s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n" +
+//            "       <s:Body>\n" +
+//            "          <u:SetAVTransportURI xmlns:u=\"urn:schemas-upnp-org:service:AVTransport:1\">\n" +
+//            "             <InstanceID>0</InstanceID>\n" +
+//            "             <CurrentURI>http://cdn.hpplay.com.cn/demo/lbtp.mp4</CurrentURI>\n" +
+//            "             <CurrentURIMetaData>&lt;DIDL-Lite  xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:sec=&quot;http://www.sec.co.kr/&quot; &gt;&lt;item id=&quot;0&quot; parentID=&quot;0&quot; restricted=&quot;0&quot;&gt;&lt;dc:title&gt;DLNA-Video&lt;/dc:title&gt;&lt;dc:creator&gt;unknown&lt;/dc:creator&gt;&lt;upnp:class&gt;object.item.videoItem&lt;/upnp:class&gt;&lt;res  protocolInfo=&quot;http-get:*:video/mp4:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01;DLNA.ORG_FLAGS=01500000000000000000000000000000&quot; &gt;http://cdn.hpplay.com.cn/demo/lbtp.mp4&lt;/res&gt;&lt;/item&gt;&lt;/DIDL-Lite&gt;</CurrentURIMetaData>\n" +
+//            "          </u:SetAVTransportURI>\n" +
+//            "       </s:Body>\n" +
+//            "    </s:Envelope>";
+//    private String getAVTransportPost(String host, int port){
+//        StringBuffer str = new StringBuffer();
+//        str.append(" POST /_urn:schemas-upnp-org:service:AVTransport_control HTTP/1.1" + CRLF);
+//        str.append("User-Agent: DMP/2.5.8, UPnP/1.0," + CRLF);
+//        str.append("HOST: " + host + ":" + port + CRLF);
+//        str.append("CONTENT-LENGTH: " + AVTransportBody.getBytes().length + CRLF);
+//        str.append("Content-Type: text/xml; charset=\"utf-8\"" + CRLF);
+//        str.append("SOAPAction: \"urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI\"" + CRLF);
+//        str.append(CRLF);
+//        str.append(AVTransportBody);
+//        String content = str.toString();
+//        return content;
+//    }
 
 /**
  *
