@@ -18,7 +18,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private Button searchBtn, serviceShow,setUrlBtn;
+    private Button searchBtn, listenerBtn,serviceShow,setUrlBtn;
     private Controller controller = new Controller();
 
     @Override
@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         searchBtn = findViewById(R.id.search_id);
         searchBtn.setOnClickListener(listener);
+        listenerBtn = findViewById(R.id.listen_id);
+        listenerBtn.setOnClickListener(listener);
         serviceShow = findViewById(R.id.service_show);
         serviceShow.setOnClickListener(listener);
         setUrlBtn = findViewById(R.id.play);
@@ -44,6 +46,10 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.search_id:
                     // 主动搜索
                     controller.sartBrowse();
+                    break;
+                case R.id.listen_id:
+                    // 监听广播
+                    controller.startService();
                     break;
                 case R.id.service_show:
                     // 获取服务信息

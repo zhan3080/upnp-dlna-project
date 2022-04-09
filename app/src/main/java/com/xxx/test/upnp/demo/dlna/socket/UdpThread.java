@@ -2,6 +2,9 @@ package com.xxx.test.upnp.demo.dlna.socket;
 
 import android.util.Log;
 
+import com.xxx.test.upnp.demo.Constants;
+import com.xxx.test.upnp.demo.Util;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -13,15 +16,10 @@ import java.util.Enumeration;
 public class UdpThread extends Thread {
 
     private static final String TAG = "UdpThread";
-    public static final int PORT = 1900;
 
-    /**
-     * Default IPv4 multicast address for SSDP messages
-     */
-    public static final String ADDRESS = "239.255.255.250";
+    private MulticastSocket mMulticastSocket;
 
     public static final String CRLF = "\r\n";
-
     private String getSearchString(){
         StringBuffer str = new StringBuffer();
         str.append("M-SEARCH * HTTP/1.1" + CRLF);
@@ -34,9 +32,6 @@ public class UdpThread extends Thread {
         String content = str.toString();
         return content;
     }
-
-    private DatagramSocket mSendSocket;
-    private MulticastSocket mMulticastSocket;
 
 
     @Override
@@ -53,7 +48,7 @@ public class UdpThread extends Thread {
         }
     }
 
-    // 不用搜索就能收到别都设备的广播
+    // 不用搜索就能收到设备的广播
     public String receive(MulticastSocket socket) {
         //创建字节数组
         byte[] by = new byte[1024];
@@ -81,31 +76,9 @@ public class UdpThread extends Thread {
         return str;
     }
 
-    public boolean post() {
-        return post(ADDRESS,PORT,getSearchString());
-    }
-
-    public boolean post(String addr, int port, String msg) {
-        if(mMulticastSocket == null){
-            Log.i(TAG,"post fail mMulticastSocket is null");
-        }
-        try {
-            InetAddress inetAddr = InetAddress.getByName(addr);
-            DatagramPacket dgmPacket = new DatagramPacket(msg.getBytes(), msg.length(), inetAddr, port);
-            mMulticastSocket.send(dgmPacket);
-        } catch (Exception e) {
-            Log.d(TAG, null, e);
-            return false;
-        }
-        Log.i(TAG,"post success msg:" + msg);
-        return true;
-    }
-
     public UdpThread() {
-
-
         try {
-            open("239.255.255.250",1900,InetAddress.getByName("192.168.31.243"));
+            open(Constants.SSDP_ADDRESS,Constants.SSDP_PORT,InetAddress.getByName(Util.getIPAddress("wlan0")));
             Log.i(TAG, "UdpThread create success");
         } catch (Exception e) {
             Log.d(TAG, null, e);
@@ -126,25 +99,6 @@ public class UdpThread extends Thread {
             return false;
         }
         return true;
-    }
-
-    public final static String getHostAddress() {
-        try {
-            Enumeration nis = NetworkInterface.getNetworkInterfaces();
-            while (nis.hasMoreElements()) {
-                NetworkInterface ni = (NetworkInterface) nis.nextElement();
-                Enumeration addrs = ni.getInetAddresses();
-                while (addrs.hasMoreElements()) {
-                    InetAddress addr = (InetAddress) addrs.nextElement();
-                    String host = addr.getHostAddress();
-                    Log.i(TAG, "getHostAddress host:" + host);
-//                    return host;
-                }
-            }
-        } catch (Exception e) {
-
-        }
-        return "";
     }
 
 

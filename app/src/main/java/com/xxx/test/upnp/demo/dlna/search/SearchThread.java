@@ -2,6 +2,7 @@ package com.xxx.test.upnp.demo.dlna.search;
 
 import android.util.Log;
 
+import com.xxx.test.upnp.demo.Constants;
 import com.xxx.test.upnp.demo.Util;
 import com.xxx.test.upnp.demo.parser.XmlParser;
 
@@ -18,19 +19,13 @@ public class SearchThread extends Thread {
     private DatagramSocket mDatagramSocket;
     private byte[] buf = new byte[1024];
     private DatagramPacket mDatagramPakcet = new DatagramPacket(buf, 1024);
-
-    private static final String DMR_ST = "urn:schemas-upnp-org:device:MediaRenderer:1";
-    private static final String ROOTDEVICE_ST = "upnp:rootdevice";
     private String mSearchString = null;
 
     /********************  forTest ********************/
-//    private static String SOURCE_IP = "192.168.31.120";
-//    private static String SOURCE_IP = "192.168.0.13";
-    private static int SOURCE_PORT = 16080;
-    private static String LOCATION = "http://192.168.0.12:49152/description.xml";
-
+    private static int LOCAL_PORT = 16080;
     public static final String CRLF = "\r\n";
 
+    //搜索用的命令
     private String getSearchString(String st){
         StringBuffer str = new StringBuffer();
         str.append("M-SEARCH * HTTP/1.1" + CRLF);
@@ -47,6 +42,7 @@ public class SearchThread extends Thread {
     @Override
     public void run() {
         super.run();
+        //mDatagramSocket 用来接收搜索设备的回应
         while (mDatagramSocket != null && !mDatagramSocket.isClosed()) {
             try {
                 Log.i(TAG, "SearchThread receive " + mDatagramSocket.isClosed());
@@ -55,6 +51,7 @@ public class SearchThread extends Thread {
 
             }
             Log.i(TAG, "SearchThread mDatagramPakcet.getData len " + mDatagramPakcet.getLength());
+            //收到回应后解析xml得到服务信息
             if (mDatagramPakcet != null && mDatagramPakcet.getData().length > 0) {
                 String packetData = new String(mDatagramPakcet.getData(), 0, mDatagramPakcet.getLength());
                 Log.i(TAG, "receive packetData string:" + packetData);
@@ -64,11 +61,11 @@ public class SearchThread extends Thread {
         }
     }
 
+    //开始先建立本地监听mDatagramSocket
     public SearchThread() {
         Log.i(TAG, "SearchThread localIp:" + Util.getIPAddress("wlan0"));
-
         try {
-            InetSocketAddress bindInetAddr = new InetSocketAddress(Util.getIPAddress("wlan0"), SOURCE_PORT);
+            InetSocketAddress bindInetAddr = new InetSocketAddress(Util.getIPAddress("wlan0"), LOCAL_PORT);
             mDatagramSocket = new DatagramSocket(bindInetAddr);
             Log.i(TAG, "SearchThread mDatagramSocket:" + mDatagramSocket);
         } catch (Exception e) {
@@ -76,7 +73,7 @@ public class SearchThread extends Thread {
         }
     }
 
-
+    //主动往SSDP_ADDRESS SSDP_PORT发广播消息（M-SEARCH），本地先要建立mDatagramSocket监听
     public void startSearch() {
         Log.i(TAG, "startSearch ");
         new Thread(new Runnable() {
@@ -84,14 +81,14 @@ public class SearchThread extends Thread {
             public void run() {
                 if (mDatagramSocket != null) {
                     try {
-                        InetAddress inetAddr = InetAddress.getByName("239.255.255.250");
-//                        mSearchString = getSearchString(ROOTDEVICE_ST);
+                        InetAddress inetAddr = InetAddress.getByName(Constants.SSDP_ADDRESS);
+//                        mSearchString = getSearchString(Constants.ROOTDEVICE_ST);
 //                        DatagramPacket packet = new DatagramPacket(mSearchString.getBytes(), mSearchString.length(),inetAddr,1900);
 //                        Log.i(TAG, "startSearch send:\n" + mSearchString);
 //                        mDatagramSocket.send(packet);
 //                        sleep(100);
-                        mSearchString = getSearchString(DMR_ST);
-                        DatagramPacket packet1 = new DatagramPacket(mSearchString.getBytes(), mSearchString.length(),inetAddr,1900);
+                        mSearchString = getSearchString(Constants.DMR_ST);
+                        DatagramPacket packet1 = new DatagramPacket(mSearchString.getBytes(), mSearchString.length(),inetAddr,Constants.SSDP_PORT);
                         Log.i(TAG, "startSearch send1:\n" + mSearchString);
                         mDatagramSocket.send(packet1);
                         Log.i(TAG, "startSearch send end");
