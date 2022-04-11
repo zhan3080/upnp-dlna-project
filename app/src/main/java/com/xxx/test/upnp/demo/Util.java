@@ -1,6 +1,5 @@
 package com.xxx.test.upnp.demo;
 
-import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 

@@ -1,52 +1,20 @@
-package com.xxx.test.upnp.demo.dlna.socket;
+package com.xxx.test.upnp.demo.dlna.search;
 
 import android.util.Log;
 
-import com.xxx.test.upnp.demo.Constants;
+import com.xxx.test.upnp.demo.DlnaCmd;
 import com.xxx.test.upnp.demo.Util;
 
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
-import java.util.Enumeration;
 
-public class UdpThread extends Thread {
+public class SearchService {
 
     private static final String TAG = "UdpThread";
-
     private MulticastSocket mMulticastSocket;
-
-    public static final String CRLF = "\r\n";
-    private String getSearchString(){
-        StringBuffer str = new StringBuffer();
-        str.append("M-SEARCH * HTTP/1.1" + CRLF);
-        str.append("ST: " + "urn:schemas-upnp-org:device:MediaRenderer:1" + CRLF);
-        str.append("MX: 3" + CRLF);
-        str.append("MAN: \"ssdp:discover\"" + CRLF);
-        str.append("User-Agent: DMP/2.5.8, UPnP/1.0," + CRLF);
-        str.append("HOST: 239.255.255.250:1900" + CRLF);
-        str.append(CRLF);
-        String content = str.toString();
-        return content;
-    }
-
-
-    @Override
-    public void run() {
-        super.run();
-        while (mMulticastSocket != null) {
-            receive(mMulticastSocket);
-            try {
-                Thread.sleep(3000);
-            }catch (Exception e){
-
-            }
-
-        }
-    }
 
     // 不用搜索就能收到设备的广播
     public String receive(MulticastSocket socket) {
@@ -76,31 +44,58 @@ public class UdpThread extends Thread {
         return str;
     }
 
-    public UdpThread() {
+    public void start(){
         try {
-            open(Constants.SSDP_ADDRESS,Constants.SSDP_PORT,InetAddress.getByName(Util.getIPAddress("wlan0")));
-            Log.i(TAG, "UdpThread create success");
-        } catch (Exception e) {
-            Log.d(TAG, null, e);
+            start(DlnaCmd.SSDP_ADDRESS, DlnaCmd.SSDP_PORT, InetAddress.getByName(Util.getIPAddress("wlan0")));
+        }catch (Exception e){
+
         }
     }
 
-    public boolean open(String addr, int port, InetAddress bindAddr) {
+    // 开始监听组播
+    public boolean start(String addr, int port, InetAddress bindAddr) {
         try {
+            // 创建MulticastSocket用于接收多播包
             mMulticastSocket = new MulticastSocket(null);
             mMulticastSocket.setReuseAddress(true);
+            // 绑定监听多播端口
             InetSocketAddress bindSockAddr = new InetSocketAddress(port);
             mMulticastSocket.bind(bindSockAddr);
+            // 把ssdpMultiGroup加入到组播里
             InetSocketAddress ssdpMultiGroup = new InetSocketAddress(InetAddress.getByName(addr), port);
             NetworkInterface ssdpMultiIf = NetworkInterface.getByInetAddress(bindAddr);
             mMulticastSocket.joinGroup(ssdpMultiGroup, ssdpMultiIf);
+            // 这样也行了
+//            mMulticastSocket = new MulticastSocket(port);
+//            mMulticastSocket.setReuseAddress(true);
+//            mMulticastSocket.joinGroup(InetAddress.getByName(addr));
         } catch (Exception e) {
             Log.d(TAG, null, e);
             return false;
         }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (mMulticastSocket != null) {
+                    receive(mMulticastSocket);
+                    try {
+                        Thread.sleep(3000);
+                    }catch (Exception e){
+
+                    }
+
+                }
+            }
+        }).start();
         return true;
     }
 
-
+    public void stop(){
+        if(mMulticastSocket != null) {
+            mMulticastSocket.close();
+            mMulticastSocket = null;
+        }
+    }
 
 }

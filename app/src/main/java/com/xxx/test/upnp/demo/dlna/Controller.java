@@ -2,8 +2,8 @@ package com.xxx.test.upnp.demo.dlna;
 
 import android.util.Log;
 
-import com.xxx.test.upnp.demo.dlna.search.SearchThread;
-import com.xxx.test.upnp.demo.dlna.socket.UdpThread;
+import com.xxx.test.upnp.demo.dlna.search.SearchService;
+import com.xxx.test.upnp.demo.dlna.search.SearchUtil;
 
 import java.net.URL;
 
@@ -15,7 +15,8 @@ public class Controller {
     String mUrl = "http://192.168.31.16:49152/description.xml";
     public static final String CRLF = "\r\n";
     MyStreamSocket mySocket = null;
-    SearchThread searchThread = null;
+    private SearchUtil mSearchUtil = null;
+    private SearchService mSearchService = null;
 
     // http://192.168.0.12:49152/description.xml
     private String getRequest(String host, int port){
@@ -46,16 +47,32 @@ public class Controller {
 //    </s:Envelope>
 
     public void startService(){
-        UdpThread mUdnThread = new UdpThread();
-        mUdnThread.start();
+        if(mSearchService == null){
+            mSearchService = new SearchService();
+        }
+        mSearchService.start();
+    }
+
+    public void stopService(){
+        if(mSearchService != null){
+            mSearchService.stop();
+            mSearchService = null;
+        }
+
     }
 
     public void sartBrowse(){
-        if(searchThread == null){
-            searchThread = new SearchThread();
-            searchThread.start();
+        if(mSearchUtil == null){
+            mSearchUtil = new SearchUtil();
         }
-        searchThread.startSearch();
+        mSearchUtil.start();
+    }
+
+    public void stopBrowse(){
+        if(mSearchUtil != null){
+            mSearchUtil.stop();
+            mSearchUtil = null;
+        }
     }
 
     //获取服务信息
