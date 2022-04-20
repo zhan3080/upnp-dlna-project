@@ -44,7 +44,16 @@ public class MyStreamSocket extends Socket {
     public String receiveMessage( )
             throws IOException {
         // read a line from the data stream
-        String message = input.readLine( );
+        String message = input.readLine();
+//        DataInputStream din = new DataInputStream(socket.getInputStream());//获得SOCKET输入流
+//        byte[] reply = new byte[1024];
+//        try {
+//            din.read(reply);
+//        }catch (Exception e){
+//
+//        }
+//        String message = new String(reply, "utf-8");
+
         return message;
     } //end receiveMessage
 

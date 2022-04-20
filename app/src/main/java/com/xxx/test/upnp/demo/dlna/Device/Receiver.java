@@ -1,26 +1,32 @@
-package com.xxx.test.upnp.demo.dlna.search;
+package com.xxx.test.upnp.demo.dlna.Device;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.xxx.test.upnp.demo.DlnaCmd;
 import com.xxx.test.upnp.demo.Util;
-import com.xxx.test.upnp.demo.parser.XmlParser;
+import com.xxx.test.upnp.demo.parser.PackageParser;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import static java.lang.Thread.sleep;
 
-public class SearchUtil{
-    private static final String TAG = "SearchUtil";
+public class Receiver{
+    private static final String TAG = "Receiver";
     private DatagramSocket mDatagramSocket;
     private static boolean mIsListening = false;
     private byte[] buf = new byte[1024];
     private DatagramPacket mDatagramPakcet = new DatagramPacket(buf, 1024);
     private String mSearchString = null;
+    private IBrowserListener mBrowserListener;
 
     /********************  forTest ********************/
     private static int LOCAL_PORT = 16080;
 
+    public void setBrowserListener(IBrowserListener listener){
+        mBrowserListener = listener;
+    }
 
     public void start(){
         startListener();
@@ -61,7 +67,11 @@ public class SearchUtil{
                         String packetData = new String(mDatagramPakcet.getData(), 0, mDatagramPakcet.getLength());
                         Log.i(TAG, "startListener packetData string:" + packetData);
 //                XmlParser.parserSSDP(mDatagramPakcet.getData());
-                        XmlParser.getLocation(packetData);
+                        String location = PackageParser.getLocation(packetData);
+                        Log.i(TAG, "startListener location:" + location);
+                        if(!TextUtils.isEmpty(location) && mBrowserListener != null){
+                            mBrowserListener.onLocationCallback(location);
+                        }
                     }
                 }
                 mIsListening = false;
@@ -87,6 +97,10 @@ public class SearchUtil{
                         DatagramPacket packet1 = new DatagramPacket(mSearchString.getBytes(), mSearchString.length(),inetAddr,DlnaCmd.SSDP_PORT);
                         Log.i(TAG, "startSearch send1:\n" + mSearchString);
                         mDatagramSocket.send(packet1);
+
+                        // 发两次，保证搜索成功率
+                        sleep(100);
+                        mDatagramSocket.send(packet1);
                         Log.i(TAG, "startSearch send end");
                     } catch (Exception e) {
 
@@ -97,8 +111,6 @@ public class SearchUtil{
         }).start();
 
     }
-
-
 
     public void stop(){
         mIsListening = false;

@@ -1,94 +1,115 @@
 package com.xxx.test.upnp.demo.dlna;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
-import com.xxx.test.upnp.demo.dlna.search.SearchService;
-import com.xxx.test.upnp.demo.dlna.search.SearchUtil;
+import androidx.annotation.NonNull;
+
+import com.xxx.test.upnp.demo.DlnaCmd;
+import com.xxx.test.upnp.demo.dlna.Device.IBrowserListener;
+import com.xxx.test.upnp.demo.dlna.Device.Receiver;
+import com.xxx.test.upnp.demo.dlna.Device.Searcher;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Controller {
     public static final String TAG = "Controller";
-
-    //String mUrl = "http://192.168.0.12:49152/description.xml";
-//    String mUrl = "http://192.168.31.201:49152/description.xml";
-    String mUrl = "http://192.168.31.16:49152/description.xml";
     public static final String CRLF = "\r\n";
     MyStreamSocket mySocket = null;
-    private SearchUtil mSearchUtil = null;
-    private SearchService mSearchService = null;
+    private Receiver mReceiver = null;
+    private Searcher mSearcher = null;
+    private static final int WHAT_BROWSER_STOP = 100;
+    public static final int DELAY_BROWSER_STOP = 10000; //搜索时长
+    private List<String> mLocationList = new ArrayList<>();
+    private Handler mHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message message) {
+            switch (message.what){
+                case WHAT_BROWSER_STOP:
+                    stopBrowse();
+                    break;
+            }
+            return false;
+        }
+    });
 
-    // http://192.168.0.12:49152/description.xml
-    private String getRequest(String host, int port){
-        StringBuffer str = new StringBuffer();
-        str.append("GET /description.xml HTTP/1.1" + CRLF);
-        str.append("User-Agent: DMP/2.5.8, UPnP/1.0," + CRLF);
-        str.append("HOST: " + host + ":" + port + CRLF);
-        str.append(CRLF);
-        String content = str.toString();
-        return content;
-    }
-
-//    POST / _urn:schemas-upnp-org:service:AVTransport_control HTTP/1.1
-//    HOST: 192.168.31.201:49152
-//    USER-AGENT: Linux/4.19.113-perf+, UPnP/1.0, Portable SDK for UPnP devices/1.6.20
-//    CONTENT-LENGTH: 2587
-//    Content-Type: text/xml; charset="utf-8"
-//    SOAPAction: "urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI"
-//
-//
-//    <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
-//    <s:Body>
-//    <u:SetAVTransportURI xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">
-//    <InstanceID>0</InstanceID>
-//    <CurrentURI>http://video.hpplay.cn/demo/aom.mp4</CurrentURI>
-//    </u:SetAVTransportURI>
-//    </s:Body>
-//    </s:Envelope>
+    private IBrowserListener mBrowserListener = new IBrowserListener() {
+        @Override
+        public void onLocationCallback(String location) {
+            if(!mLocationList.contains(location)){
+                Log.i(TAG,"onLocationCallback location:" + location);
+                mLocationList.add(location);
+                getdevice(location);
+            }
+        }
+    };
 
     public void startService(){
-        if(mSearchService == null){
-            mSearchService = new SearchService();
+        if(mSearcher == null){
+            mSearcher = new Searcher();
         }
-        mSearchService.start();
+        mSearcher.start();
     }
 
     public void stopService(){
-        if(mSearchService != null){
-            mSearchService.stop();
-            mSearchService = null;
+        if(mSearcher != null){
+            mSearcher.stop();
+            mSearcher = null;
         }
 
     }
 
     public void sartBrowse(){
-        if(mSearchUtil == null){
-            mSearchUtil = new SearchUtil();
+        if(mReceiver == null){
+            mReceiver = new Receiver();
         }
-        mSearchUtil.start();
+        mReceiver.setBrowserListener(mBrowserListener);
+        mReceiver.start();
+
+        if(mSearcher == null){
+            mSearcher = new Searcher();
+        }
+        mSearcher.setBrowserListener(mBrowserListener);
+        mSearcher.start();
+
+
+        if(mHandler != null){
+            mHandler.sendEmptyMessageDelayed(WHAT_BROWSER_STOP,DELAY_BROWSER_STOP);
+        }
     }
 
     public void stopBrowse(){
-        if(mSearchUtil != null){
-            mSearchUtil.stop();
-            mSearchUtil = null;
+        if(mLocationList != null && mLocationList.size()>0){
+            mLocationList.clear();
+        }
+        if(mReceiver != null){
+            mReceiver.stop();
+            mReceiver = null;
+        }
+        if(mSearcher != null){
+            mSearcher.stop();
+            mSearcher = null;
         }
     }
 
     //获取服务信息
-    public void getdevice(){
+    public void getdevice(String locationUrl){
         new Thread(new Runnable() {
             @Override
             public void run() {
                 String response;
                 StringBuilder stringBuilder = new StringBuilder();
                 try{
-                    URL aa = new URL(mUrl);
+                    URL aa = new URL(locationUrl);
                     if(mySocket == null) {
                         mySocket = new MyStreamSocket(aa.getHost(), aa.getPort());
                     }
                     Log.i(TAG,"getdevice mySocket:" + mySocket);
-                    mySocket.sendMessage(getRequest(aa.getHost(),aa.getPort()));
+                    mySocket.sendMessage(DlnaCmd.getRequest(aa.getHost(),aa.getPort()));
                     response = mySocket.receiveMessage();
                     Log.i(TAG,"receive1:" + response);
                     while (response != null) {
@@ -142,7 +163,7 @@ public class Controller {
 
 
     //获取服务信息
-    public void setAVTransport(){
+    public void setAVTransport(String ip, int port){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -151,12 +172,11 @@ public class Controller {
                 StringBuilder stringBuilder = new StringBuilder();
                 try{
                     Log.i(TAG,"setAVTransport mySocket:" + mySocket);
-                    URL aa = new URL(mUrl);
                     if(mySocket == null) {
-                        mySocket = new MyStreamSocket(aa.getHost(), aa.getPort());
+                        mySocket = new MyStreamSocket(ip, port);
                     }
                     Log.i(TAG,"setAVTransport mySocket11:" + mySocket);
-                    mySocket.sendMessage(getAVTransportPost(aa.getHost(),aa.getPort()));
+                    mySocket.sendMessage(getAVTransportPost(ip,port));
                     Log.i(TAG,"setAVTransport mySocket1111:" + mySocket);
                     response = mySocket.receiveMessage();
                     Log.i(TAG,"setAVTransport response1:" + response);

@@ -21,7 +21,7 @@ public class DlnaCmd {
     // 服务类型：跟设备
     public static final String ROOTDEVICE_ST = "upnp:rootdevice";
 
-    //搜索服务命令
+    // 搜索服务命令
     public static String getSearchString(String st){
         StringBuffer str = new StringBuffer();
         str.append("M-SEARCH * HTTP/1.1" + CRLF);
@@ -34,6 +34,33 @@ public class DlnaCmd {
         str.append("User-Agent: DMP/2.5.8, UPnP/1.0," + CRLF);
         str.append("HOST: " + SSDP_ADDRESS + ":" + SSDP_PORT + CRLF);
         // 命令最后还有一个结尾符，不能漏
+        str.append(CRLF);
+        String content = str.toString();
+        return content;
+    }
+
+//    POST / _urn:schemas-upnp-org:service:AVTransport_control HTTP/1.1
+//    HOST: 192.168.31.201:49152
+//    USER-AGENT: Linux/4.19.113-perf+, UPnP/1.0, Portable SDK for UPnP devices/1.6.20
+//    CONTENT-LENGTH: 2587
+//    Content-Type: text/xml; charset="utf-8"
+//    SOAPAction: "urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI"
+//
+//
+//    <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+//    <s:Body>
+//    <u:SetAVTransportURI xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">
+//    <InstanceID>0</InstanceID>
+//    <CurrentURI>http://video.hpplay.cn/demo/aom.mp4</CurrentURI>
+//    </u:SetAVTransportURI>
+//    </s:Body>
+//    </s:Envelope>
+    // 获取设备描述信息
+    public static String getRequest(String host, int port){
+        StringBuffer str = new StringBuffer();
+        str.append("GET /description.xml HTTP/1.1" + CRLF);
+        str.append("User-Agent: DMP/2.5.8, UPnP/1.0," + CRLF);
+        str.append("HOST: " + host + ":" + port + CRLF);
         str.append(CRLF);
         String content = str.toString();
         return content;

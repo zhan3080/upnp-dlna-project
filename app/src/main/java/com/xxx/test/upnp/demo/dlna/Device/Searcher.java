@@ -1,9 +1,11 @@
-package com.xxx.test.upnp.demo.dlna.search;
+package com.xxx.test.upnp.demo.dlna.Device;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.xxx.test.upnp.demo.DlnaCmd;
 import com.xxx.test.upnp.demo.Util;
+import com.xxx.test.upnp.demo.parser.PackageParser;
 
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -11,10 +13,11 @@ import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 
-public class SearchService {
+public class Searcher {
 
-    private static final String TAG = "UdpThread";
+    private static final String TAG = "Searcher";
     private MulticastSocket mMulticastSocket;
+    private IBrowserListener mBrowserListener;
 
     // 不用搜索就能收到设备的广播
     public String receive(MulticastSocket socket) {
@@ -41,7 +44,17 @@ public class SearchService {
         int port = packet.getPort();
         String str = new String(data, 0, length);
         Log.i(TAG, "receive str.lend:" + length + ", port:" + port + "\nstr:" + str);
+        String location = PackageParser.getLocation(str);
+        Log.i(TAG, "receive location:" + location);
+        if(!TextUtils.isEmpty(location) && mBrowserListener != null){
+            Log.i(TAG, "receive location--:" + location);
+            mBrowserListener.onLocationCallback(location);
+        }
         return str;
+    }
+
+    public void setBrowserListener(IBrowserListener listener){
+        mBrowserListener = listener;
     }
 
     public void start(){

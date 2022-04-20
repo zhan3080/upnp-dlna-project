@@ -19,25 +19,6 @@ import javax.xml.parsers.SAXParserFactory;
 public class XmlParser {
     public static final String TAG = "XmlParser";
 
-
-    public static String getLocation(String s){
-        Log.i(TAG,"getLocation s:" + s);
-        BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(s.getBytes(Charset.forName("utf8"))), Charset.forName("utf8")));
-        String line = null;
-        try {
-            while ((line = br.readLine()) != null){
-                Log.i(TAG,"getLocation line:" + line);
-                if(line.contains("LOCATION")){
-                    break;
-                }
-            }
-        }catch (Exception e){
-
-        }
-        Log.i(TAG,"getLocation return:" + line);
-        return line;
-    }
-
     public static void parserSSDP(String xmlString) {
         if(TextUtils.isEmpty(xmlString)){
             Log.i(TAG, "parserSSDP xmlString is null");

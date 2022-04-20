@@ -13,6 +13,8 @@ import android.widget.Button;
 
 import com.xxx.test.dlna.DMC;
 import com.xxx.test.upnp.demo.dlna.Controller;
+
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,11 +55,16 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.service_show:
                     // 获取服务信息
-                    controller.getdevice();
+                    controller.getdevice("");
                     break;
                 case R.id.play:
                     // 播放url
-                    controller.setAVTransport();
+                    try {
+                        URL location = new URL("http://192.168.31.16:49152/description.xml");
+                        controller.setAVTransport(location.getHost(), location.getPort());
+                    }catch (Exception e){
+
+                    }
                     break;
             }
         }
