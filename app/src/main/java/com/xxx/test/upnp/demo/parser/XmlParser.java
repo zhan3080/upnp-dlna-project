@@ -3,6 +3,9 @@ package com.xxx.test.upnp.demo.parser;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.xxx.test.upnp.demo.dlna.Device.DeviceBean;
+import com.xxx.test.upnp.upnp.Device;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -37,7 +40,7 @@ public class XmlParser {
             SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
             SAXParser parser = saxParserFactory.newSAXParser();
             inputStream = new ByteArrayInputStream(XmlBuf);
-            parser.parse(inputStream, new XMLHandler());
+            parser.parse(inputStream, new XMLHandler(new DeviceBean()));
         }catch (Exception e){
             Log.w(TAG, e);
         }finally {
@@ -56,10 +59,11 @@ public class XmlParser {
     static class XMLHandler extends DefaultHandler {
 
         private StringBuilder stringBuilder = new StringBuilder();
-        private String mCreator;
+        private DeviceBean mDevice;
 
-        public XMLHandler() {
+        public XMLHandler(DeviceBean device) {
             super();
+            mDevice = device;
         }
 
         @Override

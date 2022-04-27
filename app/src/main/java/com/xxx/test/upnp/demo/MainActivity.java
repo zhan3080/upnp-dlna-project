@@ -13,6 +13,7 @@ import android.widget.Button;
 
 import com.xxx.test.dlna.DMC;
 import com.xxx.test.upnp.demo.dlna.Controller;
+import com.xxx.test.upnp.demo.dlna.DeviceManager;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.service_show:
                     // 获取服务信息
-                    controller.getdevice("");
+                    DeviceManager.getInstance().getdevice("");
                     break;
                 case R.id.play:
                     // 播放url

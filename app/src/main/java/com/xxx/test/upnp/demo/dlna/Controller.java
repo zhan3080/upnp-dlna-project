@@ -3,11 +3,13 @@ package com.xxx.test.upnp.demo.dlna;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.xxx.test.upnp.demo.DlnaCmd;
+import com.xxx.test.upnp.demo.dlna.Device.DeviceBean;
 import com.xxx.test.upnp.demo.dlna.Device.IBrowserListener;
 import com.xxx.test.upnp.demo.dlna.Device.Receiver;
 import com.xxx.test.upnp.demo.dlna.Device.Searcher;
@@ -25,6 +27,8 @@ public class Controller {
     private static final int WHAT_BROWSER_STOP = 100;
     public static final int DELAY_BROWSER_STOP = 10000; //搜索时长
     private List<String> mLocationList = new ArrayList<>();
+    private List<DeviceBean> mDeviceList = new ArrayList<>();
+
     private Handler mHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message message) {
@@ -43,7 +47,17 @@ public class Controller {
             if(!mLocationList.contains(location)){
                 Log.i(TAG,"onLocationCallback location:" + location);
                 mLocationList.add(location);
-                getdevice(location);
+                DeviceManager.getInstance().getdevice(location);
+            }
+        }
+
+        @Override
+        public void onDeviceCallback(DeviceBean bean) {
+            if(bean != null){
+                Log.i(TAG,"onDeviceCallback device:" + bean.toString());
+                if(!mDeviceList.contains(bean)){
+                    mDeviceList.add(bean);
+                }
             }
         }
     };
@@ -76,7 +90,7 @@ public class Controller {
         mSearcher.setBrowserListener(mBrowserListener);
         mSearcher.start();
 
-
+        DeviceManager.getInstance().setDeviceListener(mBrowserListener);
         if(mHandler != null){
             mHandler.sendEmptyMessageDelayed(WHAT_BROWSER_STOP,DELAY_BROWSER_STOP);
         }
@@ -96,33 +110,6 @@ public class Controller {
         }
     }
 
-    //获取服务信息
-    public void getdevice(String locationUrl){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String response;
-                StringBuilder stringBuilder = new StringBuilder();
-                try{
-                    URL aa = new URL(locationUrl);
-                    if(mySocket == null) {
-                        mySocket = new MyStreamSocket(aa.getHost(), aa.getPort());
-                    }
-                    Log.i(TAG,"getdevice mySocket:" + mySocket);
-                    mySocket.sendMessage(DlnaCmd.getRequest(aa.getHost(),aa.getPort()));
-                    response = mySocket.receiveMessage();
-                    Log.i(TAG,"receive1:" + response);
-                    while (response != null) {
-                        stringBuilder.append(response);
-                        response = mySocket.receiveMessage();
-                        Log.i(TAG,"receive:" + response);//打印服务器响应信息。包括状态行。头部内容。空行。web对象内容
-                    }
-                    Log.i(TAG,"receive stringBuilder:" + stringBuilder);
-                } catch (Exception e) {
-                }
-            }
-        }).start();
-    }
 
 
 //    POST /AVTransport/9c443d47158b-dmr/control.xml HTTP/1.1

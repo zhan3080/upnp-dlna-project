@@ -52,7 +52,7 @@ public class MyStreamSocket extends Socket {
 //        }catch (Exception e){
 //
 //        }
-//        String message = new String(reply, "utf-8");
+//        String message = new String(reply, "utf-8").trim();
 
         return message;
     } //end receiveMessage
