@@ -25,7 +25,7 @@ public class Searcher {
         byte[] by = new byte[1024];
         //创建DatagramPacket对象,用来接收数据，以字节数组形式接收
         DatagramPacket packet = new DatagramPacket(by, by.length);
-        if (socket != null) {
+        if (socket != null && !socket.isClosed()) {
             try {
                 if (packet != null) {
                     socket.receive(packet); // throws IOException

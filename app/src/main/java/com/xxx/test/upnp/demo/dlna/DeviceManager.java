@@ -73,6 +73,7 @@ public class DeviceManager {
                         if(deviceBean != null
                                 &&!TextUtils.isEmpty(deviceBean.uid)
                                 &&!TextUtils.isEmpty(deviceBean.name)){
+                            deviceBean.location = locationUrl;
 //                            Log.i(TAG, "receive deviceBean:" + deviceBean);
                             mBrowserListener.onDeviceCallback(deviceBean);
                             return;

@@ -7,12 +7,20 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import com.xxx.test.dlna.DMC;
 import com.xxx.test.upnp.demo.dlna.Controller;
+import com.xxx.test.upnp.demo.dlna.Device.DeviceBean;
+import com.xxx.test.upnp.demo.dlna.Device.IBrowserListener;
+import com.xxx.test.upnp.demo.dlna.Device.IDeviceListener;
 import com.xxx.test.upnp.demo.dlna.DeviceManager;
 
 import java.net.URL;
@@ -22,6 +30,12 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private Button searchBtn, listenerBtn,serviceShow,setUrlBtn;
+    private ListView mListView;
+    private List<DeviceBean> mLastList = new ArrayList();
+    private DeviceAdapter mDeviceAdapter = null;
+    private DeviceBean mSelectDevice;
+    private Handler mHandler = new Handler(Looper.getMainLooper());
+
     private Controller controller = new Controller();
 
     @Override
@@ -38,8 +52,22 @@ public class MainActivity extends AppCompatActivity {
         setUrlBtn = findViewById(R.id.play);
         setUrlBtn.setOnClickListener(listener);
         checkPermission();
+        initDeviceList();
+        controller.setDeviceListener(mDeviceListener);
         // 被动收到设备广播
 //        controller.startService();
+    }
+
+    private void initDeviceList(){
+        mListView = findViewById(R.id.deviceList);
+        if(mDeviceAdapter == null) {
+            mDeviceAdapter = new DeviceAdapter(this.getApplicationContext(), mLastList);
+        }
+        TextView title = new TextView(this);
+        title.setText("test");
+        mListView.addHeaderView(title);
+        mListView.setAdapter(mDeviceAdapter);
+        mListView.setOnItemClickListener(mOnItemClickListener);
     }
 
     private View.OnClickListener listener = new View.OnClickListener() {
@@ -60,12 +88,15 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.play:
                     // 播放url
-                    try {
-                        URL location = new URL("http://192.168.31.16:49152/description.xml");
-                        controller.setAVTransport(location.getHost(), location.getPort());
-                    }catch (Exception e){
-
+                    if(controller != null){
+                        controller.setAVTransport(mSelectDevice,PlayConfig.DEFAULT_URL_VIDEO2);
                     }
+//                    try {
+//                        URL location = new URL("http://192.168.31.16:49152/description.xml");
+//                        controller.setAVTransport(location.getHost(), location.getPort(), "");
+//                    }catch (Exception e){
+//
+//                    }
                     break;
             }
         }
@@ -112,6 +143,49 @@ public class MainActivity extends AppCompatActivity {
         }
         Log.i(TAG, "onRequestPermissionsResult 11grantResults[0]: " + grantResults[0]);
     }
+
+    private IDeviceListener mDeviceListener = new IDeviceListener() {
+
+        @Override
+        public void onUpdateDevices(List<DeviceBean> infos) {
+            Log.w(TAG,"onUpdateDevices size:" + infos.size());
+            MainActivity.this.mHandler.post(new Runnable() {
+                public void run() {
+                    try {
+                        if (mLastList != null) {
+                            mLastList.clear();
+                        }
+                        if (infos != null) {
+                            mLastList.addAll(infos);
+                        }
+                    } catch (Exception e) {
+                        Log.w("mDeviceListener ", e);
+                    }
+
+                    if (mDeviceAdapter != null) {
+                        Log.i(TAG,"notifyDataSetChanged ");
+                        mDeviceAdapter.notifyDataSetChanged();
+                    }
+
+                }
+            });
+        }
+    };
+
+    private final AdapterView.OnItemClickListener mOnItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            Log.i(TAG,"onItemClick i:" + i);
+            if(i == 0){
+                return;
+            }
+            if(mListView!=null && mDeviceAdapter != null){
+                mSelectDevice = mLastList.get(i-1);
+                mDeviceAdapter.setSelectInfo(mSelectDevice);
+                mDeviceAdapter.notifyDataSetChanged();
+            }
+        }
+    };
 
     // CyberGarage 源码测试
     private void testDmcBrower(){
