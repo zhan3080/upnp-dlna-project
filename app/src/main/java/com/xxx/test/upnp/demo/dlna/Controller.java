@@ -8,7 +8,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.xxx.test.upnp.demo.DlnaCmd;
+import com.xxx.test.upnp.demo.dlna.CmdUtils;
 import com.xxx.test.upnp.demo.dlna.Device.DeviceBean;
 import com.xxx.test.upnp.demo.dlna.Device.IBrowserListener;
 import com.xxx.test.upnp.demo.dlna.Device.IDeviceListener;

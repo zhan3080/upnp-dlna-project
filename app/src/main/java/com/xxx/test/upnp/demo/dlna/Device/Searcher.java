@@ -3,8 +3,8 @@ package com.xxx.test.upnp.demo.dlna.Device;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.xxx.test.upnp.demo.DlnaCmd;
 import com.xxx.test.upnp.demo.Util;
+import com.xxx.test.upnp.demo.dlna.CmdUtils;
 import com.xxx.test.upnp.demo.parser.PackageParser;
 
 import java.net.DatagramPacket;
@@ -59,7 +59,7 @@ public class Searcher {
 
     public void start(){
         try {
-            start(DlnaCmd.SSDP_ADDRESS, DlnaCmd.SSDP_PORT, InetAddress.getByName(Util.getIPAddress("wlan0")));
+            start(CmdUtils.SSDP_ADDRESS, CmdUtils.SSDP_PORT, InetAddress.getByName(Util.getIPAddress("wlan0")));
         }catch (Exception e){
 
         }

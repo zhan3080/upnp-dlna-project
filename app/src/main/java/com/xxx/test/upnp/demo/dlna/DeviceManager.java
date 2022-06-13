@@ -1,13 +1,10 @@
 package com.xxx.test.upnp.demo.dlna;
 
-import android.media.AudioTrack;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.xxx.test.upnp.demo.DlnaCmd;
 import com.xxx.test.upnp.demo.dlna.Device.DeviceBean;
 import com.xxx.test.upnp.demo.dlna.Device.IBrowserListener;
-import com.xxx.test.upnp.upnp.Device;
 
 import java.net.URL;
 
@@ -50,7 +47,7 @@ public class DeviceManager {
                     DeviceBean deviceBean = null;
                     MyStreamSocket mySocket = new MyStreamSocket(aa.getHost(), aa.getPort());
 //                    Log.i(TAG, "getdevice mySocket:" + mySocket);
-                    mySocket.sendMessage(DlnaCmd.getRequest(ip, port));
+                    mySocket.sendMessage(CmdUtils.getRequest(ip, port));
                     response = mySocket.receiveMessage();
 //                    Log.i(TAG, "receive1:" + response);
 

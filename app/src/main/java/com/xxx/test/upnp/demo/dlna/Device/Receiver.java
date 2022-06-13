@@ -3,8 +3,8 @@ package com.xxx.test.upnp.demo.dlna.Device;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.xxx.test.upnp.demo.DlnaCmd;
 import com.xxx.test.upnp.demo.Util;
+import com.xxx.test.upnp.demo.dlna.CmdUtils;
 import com.xxx.test.upnp.demo.parser.PackageParser;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -87,14 +87,14 @@ public class Receiver{
             public void run() {
                 if (mDatagramSocket != null) {
                     try {
-                        InetAddress inetAddr = InetAddress.getByName(DlnaCmd.SSDP_ADDRESS);
+                        InetAddress inetAddr = InetAddress.getByName(CmdUtils.SSDP_ADDRESS);
 //                        mSearchString = DlnaCmd.getSearchString(DlnaCmd.ROOTDEVICE_ST);
 //                        DatagramPacket packet = new DatagramPacket(mSearchString.getBytes(), mSearchString.length(),inetAddr,1900);
 //                        Log.i(TAG, "startSearch send:\n" + mSearchString);
 //                        mDatagramSocket.send(packet);
 //                        sleep(100);
-                        mSearchString = DlnaCmd.getSearchString(DlnaCmd.DMR_ST);
-                        DatagramPacket packet1 = new DatagramPacket(mSearchString.getBytes(), mSearchString.length(),inetAddr,DlnaCmd.SSDP_PORT);
+                        mSearchString = CmdUtils.getSearchString(CmdUtils.DMR_ST);
+                        DatagramPacket packet1 = new DatagramPacket(mSearchString.getBytes(), mSearchString.length(),inetAddr,CmdUtils.SSDP_PORT);
                         Log.i(TAG, "startSearch send1:\n" + mSearchString);
                         mDatagramSocket.send(packet1);
 
